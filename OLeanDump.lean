@@ -109,8 +109,8 @@ def parseOLean : ByteArrayParser OLeanFile := do
   let useGmp := flags &&& 1 == 1
   unless useGmp do
     panic! "USE_GMP=OFF builds not currently supported"
-  let leanVersion := String.mk <| (← readBytes 33).toList.takeWhile (· ≠ 0) |>.map (Char.ofNat ·.toNat)
-  let githash := String.mk <| (← readBytes 40).toList.takeWhile (· ≠ 0) |>.map (Char.ofNat ·.toNat)
+  let leanVersion := String.ofList <| (← readBytes 33).toList.takeWhile (· ≠ 0) |>.map (Char.ofNat ·.toNat)
+  let githash := String.ofList <| (← readBytes 40).toList.takeWhile (· ≠ 0) |>.map (Char.ofNat ·.toNat)
   let base ← read64LE
   let mut objs : ObjLookup := {}
   let root ← read64LE
