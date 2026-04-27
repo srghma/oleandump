@@ -166,7 +166,7 @@ partial def findAttrsE (e : Expr) (whnfed := false) : MetaM Unit := do
 
 partial def findAttrs (c : Name) (ls : List Level) (args : Array Expr) : MetaM Unit := do
   if c == ``registerPersistentEnvExtension then
-    let e ← mkAppM ``PersistentEnvExtensionDescr.name #[args[4]!]
+    let e ← mkAppM ``Lean.PersistentEnvExtensionDescrCore.name #[args[4]!]
     try
       let n ← evalName (← whnf e)
       if !args[0]!.hasFVar && !args[1]!.hasFVar && !args[2]!.hasFVar then
@@ -235,7 +235,7 @@ partial def parse (ptr : ObjPtr) (layout : LayoutVal := .unknown 0) : ReprM Pars
   catch _ => pure none
   if let some ({ ctors := [n], .. }, params) := iv then
     if let .newtype i nfields ty ← getLayoutCache n then
-      let mut out := mkArray nfields (.other f!"*")
+      let mut out : Array Parse := (List.replicate nfields (.other f!"*")).toArray
       let ty ← instantiateLambda ty params
       if let some i := i then
         out := out.set! i (← parse ptr (.other ty 0))
@@ -336,7 +336,7 @@ partial def parse (ptr : ObjPtr) (layout : LayoutVal := .unknown 0) : ReprM Pars
     let res := res.fill.nest 2
     modify fun st => { st with size := st.size + sz }
     let diff := (← get).size - start
-    let newDeclId := s!"x{String.mk (Nat.toDigits 16 ((ptr - (← get).base).toNat % 2^32))}\{{diff}}"
+    let newDeclId := s!"x{String.ofList (Nat.toDigits 16 ((ptr - (← get).base).toNat % 2^32))}\{{diff}}"
     let result := parsed.getD (.other newDeclId diff)
     modify fun st => { st with ids := st.ids.insert ptr result }
     if parsed.isNone then
